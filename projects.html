@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects | Ayush Kumar Sahu</title>
+
+    <!-- Fonts: Inter for clean readability -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Icons (FontAwesome for social icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js for 3D Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        /* --- 1. CSS Reset & Variables --- */
+        :root {
+            /* Updated Palette: Pure Black Background */
+            --bg-body: #000000;
+            /* Pure Black */
+            --bg-card: #0f0f0f;
+            /* Very Dark Grey for cards */
+            --bg-card-hover: #1a1a1a;
+            --text-primary: #f8fafc;
+            /* Almost White */
+            --text-secondary: #94a3b8;
+            /* Muted Blue-Grey */
+            --accent: #10b981;
+            /* Emerald Green */
+            --border: #262626;
+            /* Subtle borders */
+
+            --container-width: 1100px;
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            padding-top: 80px;
+            /* Space for fixed navbar */
+        }
+
+        /* 3D Canvas Background */
+        #bg-3d {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            /* Behind everything */
+            opacity: 0.6;
+            /* Subtle transparency */
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* --- 2. Layout Utilities --- */
+        .container {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section {
+            padding: 60px 0 100px 0;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-header {
+            margin-bottom: 50px;
+            max-width: 600px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            display: inline-block;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* --- 3. Navbar --- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(0, 0, 0, 0.8);
+            /* Black transparent */
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-link {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--accent);
+        }
+
+        /* --- 5. Projects Section --- */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .project-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .project-card:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.7);
+            border-color: var(--accent);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tech-tag {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.05);
+            /* More subtle bg */
+            color: var(--accent);
+            font-weight: 500;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .card-links {
+            display: flex;
+            gap: 15px;
+            margin-top: auto;
+        }
+
+        .icon-link {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .icon-link:hover {
+            color: var(--accent);
+        }
+
+        /* --- 8. Footer --- */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            margin-top: 50px;
+        }
+
+        /* --- 9. Responsive Design --- */
+        @media (max-width: 900px) {
+            .nav-menu {
+                display: none;
+            }
+
+            /* Hide menu for mobile (simplify) */
+        }
+
+        @media (max-width: 600px) {
+            .section-title {
+                font-size: 1.75rem;
+            }
+
+            .container {
+                padding: 0 20px;
+            }
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 3D Canvas Background -->
+    <canvas id="bg-3d"></canvas>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Ayush<span>.dev</span></a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="projects.html" class="nav-link active">Projects</a></li>
+                <li><a href="experience.html" class="nav-link">Experience</a></li>
+                <li><a href="index.html#skills" class="nav-link">Skills</a></li>
+                <li><a href="index.html#about" class="nav-link">About</a></li>
+                <li><a href="index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Projects Section -->
+    <section id="projects" class="section visible">
+        <div class="container">
+            
+            <div class="section-header">
+                <h2 class="section-title">Selected Projects</h2>
+                <p class="section-subtitle">A curated showcase of the work I've built across AI, data, and development.</p>
+            </div>
+
+            <div class="projects-grid">
+                <!-- Project 1 -->
+                <div class="project-card">
+                    <img src="https://raw.githubusercontent.com/ayushkanha/Analytica-AI/main/SS/home%20page.png"
+                        alt="Analytica AI" class="card-image"
+                        onerror="this.src='https://placehold.co/600x400/0f0f0f/10b981?text=Analytica-AI'">
+                    <div class="card-content">
+                        <div class="card-title">
+                            Analytica-AI
+                            <div class="card-links">
+                                <a href="https://analytica-ai-five.vercel.app/" target="_blank" class="icon-link"
+                                    title="Live Demo"><i class="fa-solid fa-external-link-alt"></i></a>
+                                <a href="https://github.com/ayushkanha/Analytica-AI" target="_blank" class="icon-link"
+                                    title="GitHub Repo"><i class="fa-brands fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="tech-stack">
+                            <span class="tech-tag">React</span>
+                            <span class="tech-tag">FastAPI</span>
+                            <span class="tech-tag">Supabase</span>
+                            <span class="tech-tag">AI</span>
+                        </div>
+                        <p class="card-desc">AI-powered data analysis tool. Auto-cleans data and generates visual
+                            insights using natural language queries.</p>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="project-card">
+                    <img src="mi.png" alt="AI Mock Interviewer" class="card-image"
+                        onerror="this.src='https://placehold.co/600x400/0f0f0f/94a3b8?text=Mock+Interviewer'">
+                    <div class="card-content">
+                        <div class="card-title">
+                            AI Mock Interviewer
+                            <div class="card-links">
+                                <a href="https://github.com/ayushkanha/Ai-Mock-Interviewer" target="_blank"
+                                    class="icon-link"><i class="fa-brands fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Streamlit</span>
+                            <span class="tech-tag">OpenAI</span>
+                        </div>
+                        <p class="card-desc">Simulates job interviews using artificial intelligence to help candidates
+                            prepare with real-time feedback.</p>
+                    </div>
+                </div>
+
+                <!-- Pro-Bot (Gardening Bot) -->
+                <div class="project-card">
+                    <img src="pb.png" alt="Pro-Bot" class="card-image"
+                        onerror="this.src='https://placehold.co/600x400/0f0f0f/94a3b8?text=Pro+Bot'">
+                    <div class="card-content">
+                        <div class="card-title">
+                            Pro-Bot
+                            <div class="card-links">
+                                <a href="https://github.com/ayushkanha/Pro-Bot" target="_blank"
+                                    class="icon-link"><i class="fa-brands fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">SMTP</span>
+                            <span class="tech-tag">Google Calendar API</span>
+                            <span class="tech-tag">Text-to-Speech</span>
+                            <span class="tech-tag">Web Scraping</span>
+                        </div>
+                        <p class="card-desc">Automated plant care reminder system with email notifications, voice alerts, calendar scheduling, and visual activity tracking for smart gardening.</p>
+                    </div>
+                </div>
+                <!-- Multi-Agent AI Researcher -->
+                <div class="project-card">
+                    <img src="multi-agent-researcher.png" alt="Multi-Agent AI Researcher" class="card-image"
+                        onerror="this.src='https://placehold.co/600x400/0f0f0f/94a3b8?text=AI+Researcher'">
+                    <div class="card-content">
+                        <div class="card-title">
+                            Multi-Agent AI Researcher
+                            <div class="card-links">
+                                <a href="https://github.com/ayushkanha/Multi-Agent-AI-Researcher" target="_blank"
+                                    class="icon-link"><i class="fa-brands fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">LangChain</span>
+                            <span class="tech-tag">Multi-Agent AI</span>
+                            <span class="tech-tag">Gemini</span>
+                            <span class="tech-tag">Groq</span>
+                        </div>
+                        <p class="card-desc">Sophisticated multi-agent system using collaborative AI agents for deep research and automated report generation with PDF export capabilities.</p>
+                    </div>
+                </div>
+                <!-- Previously Hidden Projects (Now Visible) -->
+                <div class="project-card">
+                    <img src="https://placehold.co/600x400/0f0f0f/94a3b8?text=BudgetBuddy" class="card-image">
+                    <div class="card-content">
+                        <div class="card-title">
+                            BudgetBuddy
+                            <div class="card-links">
+                                <a href="https://github.com/ayushkanha/BudgetBuddy" target="_blank" class="icon-link"><i
+                                        class="fa-brands fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="tech-stack"><span class="tech-tag">Python</span><span
+                                class="tech-tag">Streamlit</span></div>
+                        <p class="card-desc">Personal finance management app to track expenses and manage budgets
+                            effectively.</p>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <img src="pc.png" alt="Price Compare" class="card-image"
+                        onerror="this.src='https://placehold.co/600x400/0f0f0f/94a3b8?text=Price+Compare'">
+                    <div class="card-content">
+                        <div class="card-title">
+                            Price Compare
+                            <div class="card-links">
+                                <a href="https://pricecompair.streamlit.app/" target="_blank" class="icon-link"><i
+                                        class="fa-solid fa-external-link-alt"></i></a>
+                                <a href="https://github.com/ayushkanha/price_compair" target="_blank"
+                                    class="icon-link"><i class="fa-brands fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="tech-stack"><span class="tech-tag">Python</span><span class="tech-tag">Web
+                                Scraping</span></div>
+                        <p class="card-desc">A tool to find the best deals by comparing prices across different
+                            e-commerce platforms.</p>
+                    </div>
+                </div>
+                <!-- Vendor Analytics -->
+                <div class="project-card">
+                    <img src="vendor-analytics.png" alt="Vendor Analytics" class="card-image"
+                        onerror="this.src='https://placehold.co/600x400/0f0f0f/94a3b8?text=Vendor+Analytics'">
+                    <div class="card-content">
+                        <div class="card-title">
+                            Vendor Analytics
+                            <div class="card-links">
+                                <a href="https://github.com/ayushkanha/Vendor_analytics" target="_blank"
+                                    class="icon-link"><i class="fa-brands fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Streamlit</span>
+                            <span class="tech-tag">Data Visualization</span>
+                            <span class="tech-tag">SQLite</span>
+                        </div>
+                        <p class="card-desc">A web application for managing sales data and visualizing key performance metrics with interactive dashboards, sales trends, and product analytics.</p>
+                    </div>
+                </div>
+
+                <!-- Voice Bridge -->
+                <div class="project-card">
+                    <img src="voice-bridge.png" alt="Voice Bridge" class="card-image"
+                        onerror="this.src='https://placehold.co/600x400/0f0f0f/94a3b8?text=Voice+Bridge'">
+                    <div class="card-content">
+                        <div class="card-title">
+                            Voice Bridge
+                            <div class="card-links">
+                                <a href="https://voicebridge.streamlit.app/" target="_blank" class="icon-link"><i
+                                        class="fa-solid fa-external-link-alt"></i></a>
+                                <a href="https://github.com/ayushkanha/Voice_Bridge" target="_blank"
+                                    class="icon-link"><i class="fa-brands fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Speech Recognition</span>
+                            <span class="tech-tag">NLP</span>
+                            <span class="tech-tag">Sentiment Analysis</span>
+                        </div>
+                        <p class="card-desc">Multilingual speech-to-text translation app with sentiment analysis for both text and audio, enabling seamless communication across languages.</p>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Analysis -->
+                <div class="project-card">
+                    <img src="whatsapp-analysis.png" alt="WhatsApp Analysis" class="card-image"
+                        onerror="this.src='https://placehold.co/600x400/0f0f0f/94a3b8?text=WhatsApp+Analysis'">
+                    <div class="card-content">
+                        <div class="card-title">
+                            WhatsApp Analysis
+                            <div class="card-links">
+                                <a href="https://github.com/ayushkanha/Whatsapp-Analysis" target="_blank"
+                                    class="icon-link"><i class="fa-brands fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Data Analysis</span>
+                            <span class="tech-tag">Streamlit</span>
+                        </div>
+                        <p class="card-desc">Analyze your WhatsApp chat history with comprehensive statistics, visualizations, and insights about messaging patterns and activity.</p>
+                    </div>
+                </div>
+
+                <!-- Password Manager -->
+                <div class="project-card">
+                    <img src="password-manager.png" alt="Password Manager" class="card-image"
+                        onerror="this.src='https://placehold.co/600x400/0f0f0f/94a3b8?text=Password+Manager'">
+                    <div class="card-content">
+                        <div class="card-title">
+                            Password Manager
+                            <div class="card-links">
+                                <a href="https://github.com/ayushkanha/Passsword-manager" target="_blank"
+                                    class="icon-link"><i class="fa-brands fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Encryption</span>
+                            <span class="tech-tag">Security</span>
+                        </div>
+                        <p class="card-desc">Secure password manager that stores credentials in encrypted form and generates strong random passwords for enhanced security.</p>
+                    </div>
+                </div>
+
+                <!-- SRMS -->
+                <div class="project-card">
+                    <img src="srms.png" alt="SRMS" class="card-image"
+                        onerror="this.src='https://placehold.co/600x400/0f0f0f/94a3b8?text=SRMS'">
+                    <div class="card-content">
+                        <div class="card-title">
+                            SRMS
+                            <div class="card-links">
+                                <a href="https://github.com/ayushkanha/SRMS" target="_blank"
+                                    class="icon-link"><i class="fa-brands fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Database</span>
+                        </div>
+                        <p class="card-desc">Student Records Management System for efficiently managing and organizing student information and academic records.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Designed & Built by Ayush Kumar Sahu © 2025</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Intersection Observer for Fade-in on Scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.section').forEach(section => {
+                observer.observe(section);
+            });
+
+            // Three.js 3D Background Animation
+            const initThreeJS = () => {
+                const canvas = document.getElementById('bg-3d');
+                if (!canvas) return;
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+
+                // Create Particles
+                const particlesGeometry = new THREE.BufferGeometry();
+                const particlesCount = 700;
+
+                const posArray = new Float32Array(particlesCount * 3);
+
+                for (let i = 0; i < particlesCount * 3; i++) {
+                    posArray[i] = (Math.random() - 0.5) * 15; // Spread
+                }
+
+                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+                // Material
+                const material = new THREE.PointsMaterial({
+                    size: 0.02,
+                    color: 0x10b981, // Accent Color
+                    transparent: true,
+                    opacity: 0.8,
+                });
+
+                // Mesh
+                const particlesMesh = new THREE.Points(particlesGeometry, material);
+                scene.add(particlesMesh);
+
+                // Add a Wireframe Icosahedron (Geometric AI feel)
+                const geoGeometry = new THREE.IcosahedronGeometry(3, 1);
+                const geoMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x10b981,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.05
+                });
+                const geoMesh = new THREE.Mesh(geoGeometry, geoMaterial);
+                scene.add(geoMesh);
+
+                camera.position.z = 5;
+
+                // Mouse Interaction
+                let mouseX = 0;
+                let mouseY = 0;
+
+                document.addEventListener('mousemove', (event) => {
+                    mouseX = event.clientX / window.innerWidth - 0.5;
+                    mouseY = event.clientY / window.innerHeight - 0.5;
+                });
+
+                // Animation Loop
+                const animate = () => {
+                    requestAnimationFrame(animate);
+
+                    // Rotate whole system slowly
+                    particlesMesh.rotation.y += 0.0005;
+                    particlesMesh.rotation.x += 0.0002;
+
+                    // Rotate Geometric Shape
+                    geoMesh.rotation.x += 0.001;
+                    geoMesh.rotation.y += 0.001;
+
+                    // Mouse Reaction
+                    particlesMesh.rotation.x += mouseY * 0.01;
+                    particlesMesh.rotation.y += mouseX * 0.01;
+
+                    renderer.render(scene, camera);
+                };
+                animate();
+
+                // Handle Resize
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            };
+
+            initThreeJS();
+        });
+    </script>
+</body>
+
+</html>

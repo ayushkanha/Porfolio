@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experience | Ayush Kumar Sahu</title>
+
+    <!-- Fonts: Inter for clean readability -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Icons (FontAwesome for social icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js for 3D Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        /* --- 1. CSS Reset & Variables --- */
+        :root {
+            /* Updated Palette: Pure Black Background */
+            --bg-body: #000000;
+            /* Pure Black */
+            --bg-card: #0f0f0f;
+            /* Very Dark Grey for cards */
+            --bg-card-hover: #1a1a1a;
+            --text-primary: #f8fafc;
+            /* Almost White */
+            --text-secondary: #94a3b8;
+            /* Muted Blue-Grey */
+            --accent: #10b981;
+            /* Emerald Green */
+            --border: #262626;
+            /* Subtle borders */
+
+            --container-width: 1100px;
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            padding-top: 80px;
+            /* Space for fixed navbar */
+        }
+
+        /* 3D Canvas Background */
+        #bg-3d {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            /* Behind everything */
+            opacity: 0.6;
+            /* Subtle transparency */
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* --- 2. Layout Utilities --- */
+        .container {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section {
+            padding: 60px 0 100px 0;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-header {
+            margin-bottom: 50px;
+            max-width: 600px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            display: inline-block;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* --- 3. Navbar --- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(0, 0, 0, 0.8);
+            /* Black transparent */
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-link {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--accent);
+        }
+
+        /* --- Experience Section --- */
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 20px;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 60px;
+            margin-bottom: 50px;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 11px;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            background: var(--bg-body);
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            z-index: 1;
+            transition: var(--transition);
+        }
+
+        .timeline-item:hover .timeline-dot {
+            background: var(--accent);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .timeline-content {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .timeline-item:hover .timeline-content {
+            transform: translateX(10px);
+            border-color: var(--accent);
+        }
+
+        .role-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .company-name {
+            font-size: 1rem;
+            color: var(--accent);
+            font-weight: 500;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .date-range {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .role-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .role-desc ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+
+        .role-desc li {
+            margin-bottom: 8px;
+        }
+
+        /* --- 8. Footer --- */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            margin-top: 50px;
+        }
+
+        /* --- 9. Responsive Design --- */
+        @media (max-width: 900px) {
+            .nav-menu {
+                display: none;
+            }
+
+            /* Hide menu for mobile (simplify) */
+        }
+
+        @media (max-width: 600px) {
+            .section-title {
+                font-size: 1.75rem;
+            }
+
+            .container {
+                padding: 0 20px;
+            }
+
+            .timeline::before {
+                left: 10px;
+            }
+
+            .timeline-item {
+                padding-left: 40px;
+            }
+
+            .timeline-dot {
+                left: 1px;
+            }
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 3D Canvas Background -->
+    <canvas id="bg-3d"></canvas>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Ayush<span>.dev</span></a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="projects.html" class="nav-link">Projects</a></li>
+                <li><a href="experience.html" class="nav-link active">Experience</a></li>
+                <li><a href="index.html#skills" class="nav-link">Skills</a></li>
+                <li><a href="index.html#about" class="nav-link">About</a></li>
+                <li><a href="index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Experience Section -->
+    <section id="experience" class="section visible">
+        <div class="container">
+
+            <div class="section-header">
+                <h2 class="section-title">Experience</h2>
+                <p class="section-subtitle">My professional journey</p>
+            </div>
+
+            <div class="timeline">
+                <!-- Experience Item New -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3 class="role-title">AI & Automation Engineer</h3>
+                        <span class="company-name">The iScale</span>
+                        <span class="date-range">September 2025 - Present | Bhilai, CG</span>
+                        <div class="role-desc">
+                            <ul>
+                                <li>Enhancing company solutions by developing an AI Mock Interviewer and AI Resume
+                                    Maker.</li>
+                                <li>Architecting a WhatsApp automation system to streamline recurring tasks like lead
+                                    assignment.</li>
+                                <li>Integrating CRM platforms and other tools to optimize operational workflows.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Experience Item 1 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3 class="role-title">Assistant Intern</h3>
+                        <span class="company-name">The iScale</span>
+                        <span class="date-range">September 2024 - September 2025 | Bhilai, CG</span>
+                        <div class="role-desc">
+                            <ul>
+                                <li>Developed and delivered 10+ end-to-end Data Analytics and Data Science projects as
+                                    course content, covering NLP, Agentic AI, Generative AI and SQL, leading to a 25%
+                                    increase in student engagement.</li>
+                                <li>Guided students in resolving technical queries, strengthening their knowledge of
+                                    Data Science, Analytics, and Programming.</li>
+                                <li>Recognized with the “Excellence Personified” certificate by the CEO for outstanding
+                                    performance and contributions.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Experience Item 2 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3 class="role-title">Intern</h3>
+                        <span class="company-name">SAIL - BHILAI STEEL PLANT</span>
+                        <span class="date-range">August 2024 - September 2024 | In Office</span>
+                        <div class="role-desc">
+                            <ul>
+                                <li>Designed and deployed a scalable framework for E-Medical website, enhancing
+                                    accessibility and user experience.</li>
+                                <li>Collaborated with the team to implement core functionalities, ensuring the platform
+                                    met client specifications and industry standards.</li>
+                                <li>Gained hands-on experience with web development and deployment practices in a
+                                    professional setting.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Designed & Built by Ayush Kumar Sahu © 2025</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Intersection Observer for Fade-in on Scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.section').forEach(section => {
+                observer.observe(section);
+            });
+
+            // Three.js 3D Background Animation
+            const initThreeJS = () => {
+                const canvas = document.getElementById('bg-3d');
+                if (!canvas) return;
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+
+                // Create Particles
+                const particlesGeometry = new THREE.BufferGeometry();
+                const particlesCount = 700;
+
+                const posArray = new Float32Array(particlesCount * 3);
+
+                for (let i = 0; i < particlesCount * 3; i++) {
+                    posArray[i] = (Math.random() - 0.5) * 15; // Spread
+                }
+
+                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+                // Material
+                const material = new THREE.PointsMaterial({
+                    size: 0.02,
+                    color: 0x10b981, // Accent Color
+                    transparent: true,
+                    opacity: 0.8,
+                });
+
+                // Mesh
+                const particlesMesh = new THREE.Points(particlesGeometry, material);
+                scene.add(particlesMesh);
+
+                // Add a Wireframe Icosahedron (Geometric AI feel)
+                const geoGeometry = new THREE.IcosahedronGeometry(3, 1);
+                const geoMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x10b981,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.05
+                });
+                const geoMesh = new THREE.Mesh(geoGeometry, geoMaterial);
+                scene.add(geoMesh);
+
+                camera.position.z = 5;
+
+                // Mouse Interaction
+                let mouseX = 0;
+                let mouseY = 0;
+
+                document.addEventListener('mousemove', (event) => {
+                    mouseX = event.clientX / window.innerWidth - 0.5;
+                    mouseY = event.clientY / window.innerHeight - 0.5;
+                });
+
+                // Animation Loop
+                const animate = () => {
+                    requestAnimationFrame(animate);
+
+                    // Rotate whole system slowly
+                    particlesMesh.rotation.y += 0.0005;
+                    particlesMesh.rotation.x += 0.0002;
+
+                    // Rotate Geometric Shape
+                    geoMesh.rotation.x += 0.001;
+                    geoMesh.rotation.y += 0.001;
+
+                    // Mouse Reaction
+                    particlesMesh.rotation.x += mouseY * 0.01;
+                    particlesMesh.rotation.y += mouseX * 0.01;
+
+                    renderer.render(scene, camera);
+                };
+                animate();
+
+                // Handle Resize
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            };
+
+            initThreeJS();
+        });
+    </script>
+</body>
+
+</html>
